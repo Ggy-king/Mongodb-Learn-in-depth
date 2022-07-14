@@ -1,0 +1,15 @@
+本地下载
+偶数为开发版本 奇数测试
+
+# 云服务 
+网站登录
+1 托管服务创建
+
+
+# 启动mongodbserve
+1
+#创建dbpath和logpath
+mkdir -p /mongodb/data /mongodb/log /mongodb/conf
+2
+#进入mongodb目录，启动mongodb服务
+bin/mongod --port=27017 --dbpath=/mongodb/data --logpath=/mongodb/log/mongodb.log \--bind_ip=0.0.0.0 --fork

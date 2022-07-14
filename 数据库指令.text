@@ -1,0 +1,24 @@
+# 通过某路径创建数据库
+
+mongod.exe --dbpath E:\mongdb\data\db
+
+# 到达mongdb命令行
+
+mongo
+
+# 查看数据库指令
+
+mongo --help
+# 全
+mongod --help
+
+# 基本指令 mongod
+{
+--dbpath :指定数据文件存放目录
+--logpath :指定日志文件，注意是指定文件不是目录
+--logappend :使用追加的方式记录日志
+--port:指定端口，默认为27017
+--bind_ip:默认只监听localhost网卡
+--fork: 后台启动
+--auth: 开启认证模式
+}
