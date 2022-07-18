@@ -1,0 +1,77 @@
+
+# mongo是MongoDB的交互式JavaScript Shell界面，它为系统管理员提供了强大的界面，并为开发人员提供了直接测试数据库查询和操作的方法。
+
+mongo --port=27017
+
+--port:指定端口，默认为27017
+--host:连接的主机地址，默认127.0.0.1
+
+# JavaScript支持
+
+mongo shell是基于JavaScript语法的，MongoDB使用了SpiderMonkey作为其内部的JavaScript解释器
+引擎，这是由Mozilla官方提供的JavaScript内核解释器，该解释器也被同样用于大名鼎鼎的Firefox浏览
+器产品之中。SpiderMonkey对ECMA Script标准兼容性非常好，可以支持ECMA Script 
+
+
+# 命令 说明
+show dbs | show databases                显示数据库列表
+
+use                          数据库名 切换数据库，如果不存在创建数据库
+
+db.dropDatabase()                   删除数据库
+
+show collections | show tables               显示当前数据库的集合列表
+
+db.集合名.stats()           查看集合详情
+
+db.集合名.drop()        删除集合
+
+show users              显示当前数据库的用户列表
+
+show roles              显示当前数据库的角色列表
+
+show profile                显示最近发生的操作
+
+load("xxx.js")              执行一个JavaScript脚本文件
+
+exit | quit()                   退出当前shell
+
+help                    查看mongodb支持哪些命令
+
+db.help()                       查询当前数据库支持的方法
+
+db.集合名.help()                    显示集合的帮助信息
+
+db.version()                        查看数据库版本
+
+# 数据库操作
+{
+    #查看所有库
+    show dbs
+    # 切换到指定数据库，不存在则创建
+    use test
+    # 删除当前数据库
+    db.dropDatabase()
+
+}
+
+# 集合操作
+{
+    #查看集合
+    show collections
+    #创建集合
+    db.createCollection("emp")
+    #删除集合
+    db.emp.drop()
+}
+
+$创建集合语法        db.createCollection(name, options)
+
+$options参数
+
+字段 类型   描述
+capped  布尔 #（可选）如果为true，则创建固定集合。固定集合是指有着固定大小的集合，当达到最大值时，它会自动覆盖最早的文档。
+size    数值    #（可选）为固定集合指定一个最大值（以字节计）。如果 capped 为 true，也需要指定该字段。
+max 数值    #（可选）指定固定集合中包含文档的最大数量。
+
+注意： 当集合不存在时，向集合中插入文档也会创建集合

@@ -13,3 +13,55 @@ mkdir -p /mongodb/data /mongodb/log /mongodb/conf
 2
 #进入mongodb目录，启动mongodb服务
 bin/mongod --port=27017 --dbpath=/mongodb/data --logpath=/mongodb/log/mongodb.log \--bind_ip=0.0.0.0 --fork
+
+--dbpath :指定数据文件存放目录
+--logpath :指定日志文件，注意是指定文件不是目录
+--logappend :使用追加的方式记录日志
+--port:指定端口，默认为27017
+--bind_ip:默认只监听localhost网卡
+--fork: 后台启动
+--auth: 开启认证模式
+
+3
+# 添加环境变量
+修改/etc/profile，添加环境变量,方便执行MongoDB命令
+export MONGODB_HOME=/usr/local/soft/mongodbPATH=$PATH:$MONGODB_HOME/bin
+然后执行source /etc/profile 重新加载环境变量
+
+4
+# 利用配置文件启动服务
+编辑/mongodb/conf/mongo.conf文件，内容如下：
+
+systemLog:
+destination: file
+path: /mongodb/log/mongod.log # log path
+logAppend: true
+storage:
+dbPath: /mongodb/data # data directory
+engine: wiredTiger #存储引擎
+journal: #是否启用journal日志
+enabled: true
+net:
+bindIp: 0.0.0.0
+port: 27017 # port
+processManagement:
+fork: true
+
+$注意：一定要yaml格式
+
+5
+# 启动mongod
+mongod -f /mongodb/conf/mongo.conf
+
+6
+# 关闭MongoDB服务
+$方式一
+mongod --port=27017 --dbpath=/mongodb/data --shutdown
+$方式二 (进入mongo shell)
+use admin
+db.shutdownServer()
+
+
+
+
+

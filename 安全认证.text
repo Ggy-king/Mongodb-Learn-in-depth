@@ -1,0 +1,50 @@
+# 创建管理员账号
+
+# 设置管理员用户名密码需要切换到admin库
+use admin
+#创建管理员
+db.createUser({user:"fox",pwd:"fox",roles:["root"]})
+# 查看所有用户信息
+show users
+#删除用户
+db.dropUser("fox")
+
+# 常用权限
+
+权限名 描述
+
+read #允许用户读取指定数据库
+
+readWrite #允许用户读写指定数据库
+
+dbAdmin #允许用户在指定数据库中执行管理函数，如索引创建、删除，查看统计或访问system.profile
+
+dbOwner #允许用户在指定数据库中执行任意操作，增、删、改、查等
+
+userAdmin #允许用户向system.users集合写入，可以在指定数据库里创建、删除和管理用户
+
+clusterAdmin #只在admin数据库中可用，赋予用户所有分片和复制集相关函数的管理权限
+
+readAnyDatabase #只在admin数据库中可用，赋予用户所有数据库的读权限
+
+readWriteAnyDatabase #只在admin数据库中可用，赋予用户所有数据库的读写权限
+
+userAdminAnyDatabase #只在admin数据库中可用，赋予用户所有数据库的userAdmin权限
+
+dbAdminAnyDatabase #只在admin数据库中可用，赋予用户所有数据库的dbAdmin权限
+
+root #只在admin数据库中可用。超级账号，超级权限
+{
+    用户认证，返回1表示认证成功
+}
+
+
+# 创建应用数据库用户
+use appdb
+db.createUser({user:"appdb",pwd:"fox",roles:["dbOwner"]})
+
+默认情况下，MongoDB不会启用鉴权，以鉴权模式启动MongoDB
+mongod -f /mongodb/conf/mongo.conf --auth
+
+启用鉴权之后，连接MongoDB的相关操作都需要提供身份认证。
+mongo 192.168.65.174:27017 -u fox -p fox --authenticationDatabase=admin
