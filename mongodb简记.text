@@ -1,0 +1,47 @@
+# show databases
+查看数据库
+默认给了三个数据库
+
+# use 数据库名
+进入数据库
+如果没有则创建 隐式创建 --后期当该数据库有数据时将自动创建
+
+# show collections
+查看集合
+
+# db.createCollection('集合名')
+创建集合
+
+# db.集合名.drop()
+删除集合
+
+# 删除数据库
+先使用use选择数据库
+在通过db.dropDatabase()删除数据库
+
+
+> show databases
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+>
+> use admin
+switched to db admin
+>
+> use admin2
+switched to db admin2
+>
+> show collections
+>
+> db.createCollection('hello')
+{ "ok" : 1 }
+>
+> db.createCollection('hello2')
+{ "ok" : 1 }
+> show collections
+hello
+hello2
+> db.hello2.drop()
+true
+>
+

@@ -1,0 +1,14 @@
+# 注意要以管理员身份运行
+
+C:\windows\system32>e:
+
+E:\>cd e:\mongodb\bin
+
+e:\mongodb\bin>mongod --install --dbpath E:\mongodb\data --logpath E:\mongodb\logs\mongodb.log
+
+e:\mongodb\bin>net start mongodb
+MongoDB 服务正在启动 .
+MongoDB 服务已经启动成功。
+
+
+e:\mongodb\bin>mongo
