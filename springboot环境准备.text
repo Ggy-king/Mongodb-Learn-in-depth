@@ -1,0 +1,27 @@
+# 1.引入依赖
+
+<!--spring data mongodb-->
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+
+# 2.配置yml
+
+spring:
+data:
+mongodb:
+uri: mongodb://fox:fox@192.168.65.174:27017/test?authSource=admin
+#uri等同于下面的配置
+#database: test
+#host: 192.168.65.174
+#port: 27017
+#username: fox
+#password: fox
+#authentication-database: admin
+
+连接配置参考文档：https://docs.mongodb.com/manual/reference/connection-string/
+
+# 3.使用时注入mongoTemplate
+@Autowired
+MongoTemplate mongoTemplate;

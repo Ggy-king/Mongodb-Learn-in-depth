@@ -1,0 +1,84 @@
+find 查询集合中的若干文档。语法格式如下：
+db.collection.find(query, projection)
+
+$query ：可选，使用查询操作符指定查询条件
+$projection ：可选，使用投影操作符指定返回的键。查询时返回文档中所有键值， 
+    只需省略该参数即可（默认省略）。投影时，id为1的时候，其他字段必须是1；id是0的时候，
+    其他字段可以是0；如果没有_id字段约束，多个其他字段必须同为0或同为1。
+
+如果查询返回的条目数量较多，mongo shell则会自动实现分批显示。默认情况下每次只显示20条，可
+以输入it命令读取下一批。
+
+#
+findOne查询集合中的第一个文档。语法格式如下：
+
+db.collection.findOne(query, projection)
+
+# 条件查询
+1
+$指定条件查询
+
+#查询带有nosql标签的book文档：
+db.books.find({tag:"nosql"})
+#按照id查询单个book文档：
+db.books.find({_id:ObjectId("61caa09ee0782536660494d9")})
+#查询分类为“travel”、收藏数超过60个的book文档：
+db.books.find({type:"travel",favCount:{$gt:60}})
+
+2
+$查询条件对照表
+
+SQL                      MQL
+a = 1               {a: 1}
+a <> 1              {a: {$ne: 1}}
+a > 1               {a: {$gt: 1}}
+a >= 1              {a: {$gte: 1}}
+a < 1               {a: {$lt: 1}}
+a <= 1              {a: {$lte: 1}}
+
+3
+$查询逻辑对照表
+
+SQL                     MQL
+a = 1 AND b = 1          {a: 1, b: 1}或{$and: [{a: 1}, {b: 1}]}
+a = 1 OR b = 1           {$or: [{a: 1}, {b: 1}]}
+a IS NULL                {a: {$exists: false}}
+a IN (1, 2, 3)           {a: {$in: [1, 2, 3]}}
+
+4
+$查询逻辑运算符
+
+下面的$是写法 不是我自己的标注
+    $lt: 存在并小于
+    $lte: 存在并小于等于
+    $gt: 存在并大于
+    $gte: 存在并大于等于
+    $ne: 不存在或存在但不等于
+    $in: 存在并在指定数组中
+    $nin: 不存在或不在指定数组中
+    $or: 匹配两个或多个条件中的一个
+    $and: 匹配全部条件
+
+5
+$排序&分页
+
+指定排序 --在 MongoDB 中使用 sort() 方法对数据进行排序
+#指定按收藏数（favCount）降序返回
+db.books.find({type:"travel"}).sort({favCount:-1})
+
+分页查询 --skip用于指定跳过记录数，limit则用于限定返回结果数量。
+            可以在执行find命令的同时指定skip、limit参数，以此实现分页的功能。
+            比如，假定每页大小为8条，查询第3页的book文档：
+db.books.find().skip(8).limit(4)
+
+6
+$正则表达式匹配查询
+
+MongoDB 使用 $regex 操作符来设置匹配字符串的正则表达式。
+//使用正则表达式查找type包含 so 字符串的book
+db.books.find({type:{$regex:"so"}})
+//或者
+db.books.find({type:/so/})
+
+
+

@@ -1,0 +1,38 @@
+# 使用 remove 删除文档
+
+remove 命令需要配合查询条件使用；
+匹配查询条件的文档会被删除；
+指定一个空文档条件会删除所有文档；
+
+db.user.remove({age:28})// 删除age 等于28的记录
+db.user.remove({age:{$lt:25}}) // 删除age 小于25的记录
+db.user.remove( { } ) // 删除所有记录
+db.user.remove() //报错
+
+remove命令会删除匹配条件的全部文档，如果希望明确限定只删除一个文档，则需要指定justOne参
+数，命令格式如下：
+db.collection.remove(query,justOne)
+
+例如：删除满足type:novel条件的首条记录
+db.books.remove({type:"novel"},true)
+
+# 使用 delete 删除文档
+
+官方推荐使用 deleteOne() 和 deleteMany() 方法删除文档，语法格式如下：
+db.books.deleteMany ({}) //删除集合下全部文档
+db.books.deleteMany ({ type:"novel" }) //删除 type等于 novel 的全部文档
+db.books.deleteOne ({ type:"novel" }) //删除 type等于novel 的一个文档
+
+注意： remove、deleteMany等命令需要对查询范围内的文档逐个删除，如果希望删除整个集合，则使
+用drop命令会更加高效
+
+# 返回被删除文档
+remove、deleteOne等命令在删除文档后只会返回确认性的信息，如果希望获得被删除的文档，则可以
+使用findOneAndDelete命令
+db.books.findOneAndDelete({type:"novel"})
+
+除了在结果中返回删除文档，findOneAndDelete命令还允许定义“删除的顺序”，即按照指定顺序删除找
+到的第一个文档
+db.books.findOneAndDelete({type:"novel"},{sort:{favCount:1}})
+
+$remove、deleteOne等命令只能按默认顺序删除，利用这个特性，findOneAndDelete可以实现队列的先进先出。

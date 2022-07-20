@@ -1,1 +1,61 @@
-】
+# 新增单个文档
+$3.2 版本之后新增了 db.collection.insertOne() 和 db.collection.insertMany()。
+
+insertOne: 支持writeConcern
+
+db.collection.insertOne(
+<document>,
+{
+writeConcern: <document>
+}
+)
+{
+    writeConcern 决定一个写操作落到多少个节点上才算成功。writeConcern 的取值包括：
+    0：发起写操作，不关心是否成功；
+    1~集群最大数据节点数：写操作需要被复制到指定节点数才算成功；
+    majority：写操作需要被复制到大多数节点上才算成功。
+}
+
+$nsert: 若插入的数据主键已经存在，则会抛 DuplicateKeyException 异常，提示主键重复，不保存当前数据。
+$save: 如果 _id 主键存在则更新数据，如果不存在就插入数据。
+
+# 批量新增文档
+insertMany:向指定集合中插入多条文档数据
+
+db.collection.insertMany(
+[ <document 1> , <document 2>, ... ],
+{
+writeConcern: <document>,
+ordered: <boolean>
+}
+)
+
+writeConcern：写入策略，默认为 1，即要求确认写操作，0 是不要求。
+ordered：指定是否按顺序写入，默认 true，按顺序写入
+
+$insert和save也可以实现批量插入
+
+#测试：批量插入50条随机数据
+编辑脚本book.js
+
+var tags = ["nosql","mongodb","document","developer","popular"];
+var types = ["technology","sociality","travel","novel","literature"];
+var books=[];
+for(var i=0;i<50;i++){
+var typeIdx = Math.floor(Math.random()*types.length);
+var tagIdx = Math.floor(Math.random()*tags.length);
+var favCount = Math.floor(Math.random()*100);
+var book = {
+title: "book-"+i,
+type: types[typeIdx],
+tag: tags[tagIdx],
+favCount: favCount,
+author: "xxx"+i
+};
+books.push(book)
+}
+db.books.insertMany(books);
+
+进入mongo shell，执行
+
+load("books.js")

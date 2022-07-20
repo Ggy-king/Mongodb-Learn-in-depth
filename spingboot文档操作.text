@@ -1,0 +1,65 @@
+# 相关注解
+
+@Document
+修饰范围: 用在类上
+作用: 用来映射这个类的一个对象为mongo中一条文档数据。
+属性:( value 、collection )用来指定操作的集合名称
+@Id
+修饰范围: 用在成员变量、方法上
+作用: 用来将成员变量的值映射为文档的_id的值
+@Field
+修饰范围: 用在成员变量、方法上
+作用: 用来将成员变量及其值映射为文档中一个key:value对。
+属性:( name , value )用来指定在文档中 key的名称,默认为成员变量名
+@Transient
+修饰范围:用在成员变量、方法上
+作用:用来指定此成员变量不参与文档的序列化
+
+
+# 创建实体
+
+@Document("emp") //对应emp集合中的一个文档
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Employee {
+@Id //映射文档中的_id
+private Integer id;
+@Field("username")
+private String name;
+@Field
+private int age;
+@Field
+private Double salary;
+@Field
+private Date birthday;
+}
+
+# 添加文档
+
+insert方法返回值是新增的Document对象，里面包含了新增后id的值。如果集合不存在会自动创建集
+合。通过Spring Data MongoDB还会给集合中多加一个class的属性，存储新增时Document对应Java中
+类的全限定路径。这么做为了查询时能把Document转换为Java类型。
+
+@Test
+public void testInsert(){
+Employee employee = new Employee(1, "小明", 30,10000.00, new Date());
+//添加文档
+// sava: _id存在时更新数据
+//mongoTemplate.save(employee);
+// insert： _id存在抛出异常 支持批量操作
+mongoTemplate.insert(employee);
+List<Employee> list = Arrays.asList(
+new Employee(2, "张三", 21,5000.00, new Date()),
+new Employee(3, "李四", 26,8000.00, new Date()),
+new Employee(4, "王五",22, 8000.00, new Date()),
+new Employee(5, "张龙",28, 6000.00, new Date()),
+new Employee(6, "赵虎",24, 7000.00, new Date()),
+new Employee(7, "赵六",28, 12000.00, new Date()));
+//插入多条数据
+mongoTemplate.insert(list,Employee.class);
+}
+
+# 查询文档
+Criteria是标准查询的接口，可以引用静态的Criteria.where的把多个条件组合在一起，就可以轻松地将
+多个方法标准和查询连接起来，方便我们操作查询语句。

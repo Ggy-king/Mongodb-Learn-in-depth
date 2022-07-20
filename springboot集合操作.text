@@ -1,0 +1,12 @@
+# 集合操作
+
+@Test
+public void testCollection(){
+boolean exists = mongoTemplate.collectionExists("emp");
+if (exists) {
+//删除集合
+mongoTemplate.dropCollection("emp");
+}
+//创建集合
+mongoTemplate.createCollection("emp");
+}

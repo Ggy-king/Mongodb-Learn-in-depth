@@ -1,0 +1,104 @@
+可以用update命令对指定的数据进行更新，命令的格式如下：
+db.collection.update(query,update,options)
+
+#
+query：描述更新的查询条件；
+update：描述更新的动作及新的内容；
+options：描述更新的选项
+upsert: 可选，如果不存在update的记录，是否插入新的记录。默认false，不插入
+multi: 可选，是否按条件查询出的多条记录全部更新。 默认false,只更新找到的第一条记录
+writeConcern :可选，决定一个写操作落到多少个节点上才算成功。
+
+1
+# 更新操作符
+
+操作符 格式 描述
+$set {$set:{field:value}} 指定一个键并更新值，若键不存在则创建
+
+$unset {$unset : {field : 1 }} 删除一个键
+
+$inc {$inc : {field : value } } 对数值类型进行增减
+
+$rename {$rename : {old_field_name :new_field_name } } 修改字段名称
+
+$push { $push : {field : value } } 将数值追加到数组中，若数组不存在则会进行初始化
+
+$pushAll {$pushAll : {field : value_array }} 追加多个值到一个数组字段内
+
+$pull {$pull : {field : _value } } 从数组中删除指定的元素
+
+$addToSet {$addToSet : {field : value } } 添加元素到数组中，具有排重功能
+
+$pop {$pop : {field : 1 }} 删除数组的第一个或最后一个元素
+
+2
+# 更新单个文档
+某个book文档被收藏了，则需要将该文档的favCount字段自增
+db.books.update({_id:ObjectId("61caa09ee0782536660494d9")},{$inc:{favCount:1}})
+
+3
+# 更新多个文档
+默认情况下，update命令只在更新第一个文档之后返回，如果需要更新多个文档，则可以使用multi选项。
+
+将分类为“novel”的文档的增加发布时间（publishedDate）
+db.books.update({type:"novel"},{$set:{publishedDate:new Date()}},{"multi":true})
+{
+    multi : 可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true,就把按条件
+    查出来多条记录全部更新
+}
+
+
+$update命令的选项配置较多，为了简化使用还可以使用一些快捷命令:
+
+updateOne：更新单个文档。
+updateMany：更新多个文档。
+replaceOne：替换单个文档。
+
+4
+# 使用upsert命令
+upsert是一种特殊的更新，其表现为如果目标文档不存在，则执行插入命令。
+
+db.books.update(
+{title:"my book"},
+{$set:{tags:["nosql","mongodb"],type:"none",author:"fox"}},
+{upsert:true}
+)
+
+nMatched、nModified都为0，表示没有文档被匹配及更新，nUpserted=1提示执行了upsert动作
+
+5
+# 实现replace语义
+update命令中的更新描述（update）通常由操作符描述，如果更新描述中不包含任何操作符，那么
+MongoDB会实现文档的replace语义
+
+db.books.update(
+{title:"my book"},
+{justTitle:"my first book"}
+)
+
+6
+# findAndModify命令
+findAndModify兼容了查询和修改指定文档的功能，findAndModify只能更新单个文档
+
+//将某个book文档的收藏数（favCount）加1
+db.books.findAndModify({
+query:{_id:ObjectId("61caa09ee0782536660494dd")},
+update:{$inc:{favCount:1}}
+})
+$该操作会返回符合查询条件的文档数据，并完成对文档的修改。
+
+默认情况下，findAndModify会返回修改前的“旧”数据。如果希望返回修改后的数据，则可以指定new选
+项
+
+db.books.findAndModify({
+query:{_id:ObjectId("61caa09ee0782536660494dd")},
+update:{$inc:{favCount:1}},
+new: true
+})
+
+与findAndModify语义相近的命令如下：
+
+findOneAndUpdate：更新单个文档并返回更新前（或更新后）的文档。
+findOneAndReplace：替换单个文档并返回替换前（或替换后）的文档。
+
+
