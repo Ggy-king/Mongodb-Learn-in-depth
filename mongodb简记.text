@@ -45,3 +45,49 @@ hello2
 true
 >
 
+# 增加
+db.集合名.insert(JSON数据)
+集合存在则直接插入数据 集合不存在则隐式创建
+
+##mongodb会给每个数据增加一个_id建 （全球唯一）    可以自定义差插入_id建 覆盖即可 但强烈不推荐
+
+{
+    插入多条数据 (插入数组 数组中写jsoh数据即可)
+    支持部分js语法 可以写for循环
+    for(var i = 1; i <= 10; i++){
+        db.c2.insert({uname:"a" + i,age:i})
+    }   //for循环是一条一条插入 只能看到最后一条
+}
+
+
+如 db.c1.insert({uname:"webopenffather",age:18})
+# 注意JSON数据是要都写引号的 但mongodb为了方便建不用写
+
+# 查看数据
+db.c1.find(条件[,查询的列])
+
+条件 
+    查询所有数据 {}或者不写
+    查询age=6  {age:6}
+    多条件    {age:6,sex:'男'}
+查询的列
+        不写则是所有
+        {age:1} 只显示age列
+        {age:0} 除age列
+
+选择大于5的age数据
+db.cl.find({age:{$gt:5}})
+
+# 改数据
+db.集合名.update(条件,新数据[,是否新增,是否修改多条])   #注意 新数据指的是替换
+
+是否新增 指条件匹配不到数据则插入(true是插入,false不插入)
+是否修改多条 指将匹配成功的数据都修改(true是插入,false不插入)
+
+##### 想要修改而不是替换 语法   ：db.c2.update({uname:"zs2"},{$set:{uname:"zs3"}})
+
+# 修改多
+db.c2.update({uname:"zs2"},{
+    $set:{uname:"zs3"},
+    $inc:{age:11}
+})
