@@ -63,3 +63,179 @@ mongoTemplate.insert(list,Employee.class);
 # 查询文档
 Criteria是标准查询的接口，可以引用静态的Criteria.where的把多个条件组合在一起，就可以轻松地将
 多个方法标准和查询连接起来，方便我们操作查询语句。
+
+@Test
+public void testFind(){
+System.out.println("==========查询所有文档===========");
+//查询所有文档
+List<Employee> list = mongoTemplate.findAll(Employee.class);
+list.forEach(System.out::println);
+System.out.println("==========根据_id查询===========");
+//根据_id查询
+Employee e = mongoTemplate.findById(1, Employee.class);
+System.out.println(e);
+System.out.println("==========findOne返回第一个文档===========");
+//如果查询结果是多个，返回其中第一个文档对象
+Employee one = mongoTemplate.findOne(new Query(), Employee.class);
+System.out.println(one);
+System.out.println("==========条件查询===========");
+//new Query() 表示没有条件
+//查询薪资大于等于8000的员工
+//Query query = new Query(Criteria.where("salary").gte(8000));
+//查询薪资大于4000小于10000的员工
+//Query query = new Query(Criteria.where("salary").gt(4000).lt(10000));
+//正则查询（模糊查询） java中正则不需要有//
+//Query query = new Query(Criteria.where("name").regex("张"));
+//and or 多条件查询
+Criteria criteria = new Criteria();
+//and 查询年龄大于25&薪资大于8000的员工
+//criteria.andOperator(Criteria.where("age").gt(25),Criteria.where("salary").gt
+(8000));
+//or 查询姓名是张三或者薪资大于8000的员工
+criteria.orOperator(Criteria.where("name").is("张
+三"),Criteria.where("salary").gt(5000));
+Query query = new Query(criteria);
+//sort排序
+//query.with(Sort.by(Sort.Order.desc("salary")));
+图灵课堂Fox老师
+更新文档
+在Mongodb中无论是使用客户端API还是使用Spring Data，更新返回结果一定是受行数影响。如果更新
+后的结果和更新前的结果是相同，返回0。
+updateFirst() 只更新满足条件的第一条记录
+updateMulti() 更新所有满足条件的记录
+upsert() 没有符合条件的记录则插入数据
+//skip limit 分页 skip用于指定跳过记录数，limit则用于限定返回结果数量。
+query.with(Sort.by(Sort.Order.desc("salary")))
+.skip(0) //指定跳过记录数
+.limit(4); //每页显示记录数
+//查询结果
+List<Employee> employees = mongoTemplate.find(
+query, Employee.class);
+employees.forEach(System.out::println);
+}
+@Test
+public void testFind(){
+System.out.println("==========查询所有文档===========");
+//查询所有文档
+List<Employee> list = mongoTemplate.findAll(Employee.class);
+list.forEach(System.out::println);
+System.out.println("==========根据_id查询===========");
+//根据_id查询
+Employee e = mongoTemplate.findById(1, Employee.class);
+System.out.println(e);
+System.out.println("==========findOne返回第一个文档===========");
+//如果查询结果是多个，返回其中第一个文档对象
+Employee one = mongoTemplate.findOne(new Query(), Employee.class);
+System.out.println(one);
+System.out.println("==========条件查询===========");
+//new Query() 表示没有条件
+//查询薪资大于等于8000的员工
+//Query query = new Query(Criteria.where("salary").gte(8000));
+//查询薪资大于4000小于10000的员工
+//Query query = new Query(Criteria.where("salary").gt(4000).lt(10000));
+//正则查询（模糊查询） java中正则不需要有//
+//Query query = new Query(Criteria.where("name").regex("张"));
+//and or 多条件查询
+Criteria criteria = new Criteria();
+//and 查询年龄大于25&薪资大于8000的员工
+//criteria.andOperator(Criteria.where("age").gt(25),Criteria.where("salary").gt
+(8000));
+//or 查询姓名是张三或者薪资大于8000的员工
+criteria.orOperator(Criteria.where("name").is("张
+三"),Criteria.where("salary").gt(5000));
+Query query = new Query(criteria);
+//sort排序
+//query.with(Sort.by(Sort.Order.desc("salary")));
+图灵课堂Fox老师
+更新文档
+在Mongodb中无论是使用客户端API还是使用Spring Data，更新返回结果一定是受行数影响。如果更新
+后的结果和更新前的结果是相同，返回0。
+updateFirst() 只更新满足条件的第一条记录
+updateMulti() 更新所有满足条件的记录
+upsert() 没有符合条件的记录则插入数据
+//skip limit 分页 skip用于指定跳过记录数，limit则用于限定返回结果数量。
+query.with(Sort.by(Sort.Order.desc("salary")))
+.skip(0) //指定跳过记录数
+.limit(4); //每页显示记录数
+//查询结果
+List<Employee> employees = mongoTemplate.find(
+query, Employee.class);
+employees.forEach(System.out::println);
+}
+
+
+@Test
+public void testFindByJson() {
+//使用json字符串方式查询
+//等值查询
+//String json = "{name:'张三'}";
+//多条件查询
+String json = "{$or:[{age:{$gt:25}},{salary:{$gte:8000}}]}";
+Query query = new BasicQuery(json);
+//查询结果
+List<Employee> employees = mongoTemplate.find(
+query, Employee.class);
+employees.forEach(System.out::println);
+}
+
+
+# 更新文档
+
+在Mongodb中无论是使用客户端API还是使用Spring Data，更新返回结果一定是受行数影响。如果更新
+后的结果和更新前的结果是相同，返回0。
+updateFirst() 只更新满足条件的第一条记录
+updateMulti() 更新所有满足条件的记录
+upsert() 没有符合条件的记录则插入数据
+
+@Test
+public void testUpdate(){
+//query设置查询条件
+Query query = new Query(Criteria.where("salary").gte(15000));
+System.out.println("==========更新前===========");
+List<Employee> employees = mongoTemplate.find(query, Employee.class);
+employees.forEach(System.out::println);
+Update update = new Update();
+//设置更新属性
+update.set("salary",13000);
+//updateFirst() 只更新满足条件的第一条记录
+//UpdateResult updateResult = mongoTemplate.updateFirst(query, update,
+Employee.class);
+//updateMulti() 更新所有满足条件的记录
+图灵课堂Fox老师
+删除文档
+5.聚合操作
+聚合操作处理数据记录并返回计算结果(诸如统计平均值，求和等)。聚合操作组值来自多个文档，可以对
+分组数据执行各种操作以返回单个结果。聚合操作包含三类：单一作用聚合、聚合管道、MapReduce。
+单一作用聚合：提供了对常见聚合过程的简单访问，操作都从单个集合聚合文档。
+聚合管道是一个数据聚合的框架，模型基于数据处理流水线的概念。文档进入多级管道，将文档转
+换为聚合结果。
+MapReduce操作具有两个阶段：处理每个文档并向每个输入文档发射一个或多个对象的map阶
+段，以及reduce组合map操作的输出阶段。
+5.1 单一作用聚合
+MongoDB提供 db.collection.estimatedDocumentCount(), db.collection.count(),
+db.collection.distinct() 这类单一作用的聚合函数。 所有这些操作都聚合来自单个集合的文档。虽然这
+些操作提供了对公共聚合过程的简单访问，但它们缺乏聚合管道和map-Reduce的灵活性和功能。
+//UpdateResult updateResult = mongoTemplate.updateMulti(query, update,
+Employee.class);
+//upsert() 没有符合条件的记录则插入数据
+//update.setOnInsert("id",11); //指定_id
+UpdateResult updateResult = mongoTemplate.upsert(query, update,
+Employee.class);
+//返回修改的记录数
+System.out.println(updateResult.getModifiedCount());
+System.out.println("==========更新后===========");
+employees = mongoTemplate.find(query, Employee.class);
+employees.forEach(System.out::println);
+}
+
+# 删除文档
+
+@Test
+public void testDelete(){
+//删除所有文档
+//mongoTemplate.remove(new Query(),Employee.class);
+//条件删除
+Query query = new Query(Criteria.where("salary").gte(10000));
+mongoTemplate.remove(query,Employee.class);
+}
+

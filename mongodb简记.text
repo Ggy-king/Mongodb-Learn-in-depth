@@ -91,3 +91,10 @@ db.c2.update({uname:"zs2"},{
     $set:{uname:"zs3"},
     $inc:{age:11}
 })
+
+## 删除集合
+db.集合名.remove(条件[,是否删除一条])
+
+
+# 多学一招
+db.集合名.find().pretty()
