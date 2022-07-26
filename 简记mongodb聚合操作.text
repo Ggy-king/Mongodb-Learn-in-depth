@@ -1,0 +1,25 @@
+# 聚合查询
+
+把数据聚合聚拢起来查询
+
+语法
+da.集合名.aggregate({
+    {管道:{表达式}}
+    ...
+})
+
+如
+db.c1.aggregate({
+    $group:{                        # 分组
+        _id:"$sex",                 # 按sex相同分组
+        rs:{$sum:"$age"}            # 多加条件 求age和以rs展示
+    }
+})
+
+db.c1.aggregate({
+    $group:{                        # 分组
+        _id: null,                  # 全部数据不分组
+        total_num: {$sum:1}         # 总人数统计
+        total_avg: {$avg: "$age"}   # 求人总年龄平均值
+    }
+})

@@ -1,0 +1,129 @@
+$project
+
+投影操作， 将原始字段投影成指定名称， 如将集合中的 title 投影成 name
+db.books.aggregate([{$project:{name:"$title"}}])
+
+$project 可以灵活控制输出文档的格式，也可以剔除不需要的字段
+db.books.aggregate([{$project:{name:"$title",_id:0,type:1,author:1}}])
+
+从嵌套文档中排除字段
+db.books.aggregate([
+{$project:{name:"$title",_id:0,type:1,"author.name":1}}
+])
+或者
+db.books.aggregate([
+{$project:{name:"$title",_id:0,type:1,author:{name:1}}}
+])
+
+$match
+
+$match用于对文档进行筛选，之后可以在得到的文档子集上做聚合，$match可以使用除了地理空间之
+外的所有常规查询操作符，在实际应用中尽可能将$match放在管道的前面位置。这样有两个好处：一是
+可以快速将不需要的文档过滤掉，以减少管道的工作量；二是如果再投射和分组之前执行$match，查询
+可以使用索引。
+
+db.books.aggregate([{$match:{type:"technology"}}])
+
+筛选管道操作和其他管道操作配合时候时，尽量放到开始阶段，这样可以减少后续管道操作符要操作的
+文档数，提升效率
+
+$count
+计数并返回与查询匹配的结果数
+
+db.books.aggregate([ {$match:{type:"technology"}}, {$count: "type_count"}
+])
+
+$match阶段筛选出type匹配technology的文档，并传到下一阶段；
+$count阶段返回聚合管道中剩余文档的计数，并将该值分配给type_count
+
+$group
+
+按指定的表达式对文档进行分组，并将每个不同分组的文档输出到下一个阶段。输出文档包含一个_id字
+段，该字段按键包含不同的组。
+
+输出文档还可以包含计算字段，该字段保存由$group的_id字段分组的一些accumulator表达式的值。
+$group不会输出具体的文档而只是统计信息。
+
+{ $group: { _id: <expression>, <field1>: { <accumulator1> : <expression1> }, ...
+} }
+
+id字段是必填的;但是，可以指定id值为null来为整个输入文档计算累计值。
+剩余的计算字段是可选的，并使用运算符进行计算。
+_id和表达式可以接受任何有效的表达式。
+
+
+名称 描述 类比
+
+$avg 计算均值 avg
+
+$first 返回每组第一个文档，如果有排序，按照排序，如果没有按照默认的存储的顺序的第一个文档。limit  0,1
+
+$last 返回每组最后一个文档，如果有排序，按照排序，如果没有按照默认的存储的顺序的最后个文档。 -
+
+$max 根据分组，获取集合中所有文档对应值得最大值。 max
+
+$min 根据分组，获取集合中所有文档对应值得最小值。 min
+
+$push 将指定的表达式的值添加到一个数组中。 -
+
+$addToSet 将表达式的值添加到一个集合中（无重复值，无序）。 -
+
+$sum 计算总和 sum
+
+$stdDevPop 返回输入值的总体标准偏差（population standard deviation） -
+
+$stdDevSamp 返回输入值的样本标准偏差（the sample standard deviation） -
+
+
+
+# $group阶段的内存限制为100M。默认情况下，如果stage超过此限制，$group将产生错误。但是，要允许处理大型数据集，请将allowDiskUse选项设置为true以启用$group操作以写入临时文件。
+
+
+# book的数量，收藏总数和平均值
+db.books.aggregate([
+{$group:{_id:null,count:{$sum:1},pop:{$sum:"$favCount"},avg:
+{$avg:"$favCount"}}}
+])
+
+# 统计每个作者的book收藏总数
+db.books.aggregate([
+{$group:{_id:"$author.name",pop:{$sum:"$favCount"}}}
+])
+
+# 统计每个作者的每本book的收藏数
+db.books.aggregate([
+{$group:{_id:{name:"$author.name",title:"$title"},pop:{$sum:"$favCount"}}}
+])
+
+# 每个作者的book的type合集
+db.books.aggregate([
+{$group:{_id:"$author.name",types:{$addToSet:"$type"}}}
+])
+
+$unwind
+
+可以将数组拆分为单独的文档
+v3.2+支持如下语法：
+
+{
+$unwind:
+{
+#要指定字段路径，在字段名称前加上$符并用引号括起来。
+path: <field path>,
+#可选,一个新字段的名称用于存放元素的数组索引。该名称不能以$开头。
+includeArrayIndex: <string>,
+#可选，default :false，若为true,如果路径为空，缺少或为空数组，则$unwind输出文档
+preserveNullAndEmptyArrays: <boolean>
+} }
+
+姓名为xx006的作者的book的tag数组拆分为多个文档
+db.books.aggregate([
+{$match:{"author.name":"xx006"}},
+{$unwind:"$tag"}
+])
+
+每个作者的book的tag合集
+db.books.aggregate([
+{$unwind:"$tag"},
+{$group:{_id:"$author.name",types:{$addToSet:"$tag"}}}
+])

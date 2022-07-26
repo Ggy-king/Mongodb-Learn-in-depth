@@ -1,0 +1,64 @@
+# 聚合管道
+
+# 什么是 MongoDB 聚合框架
+
+MongoDB 聚合框架（Aggregation Framework）是一个计算框架，它可以：
+    作用在一个或几个集合上；
+    对集合中的数据进行的一系列运算；
+    将这些数据转化为期望的形式；
+从效果而言，聚合框架相当于 SQL 查询中的GROUP BY、 LEFT OUTER JOIN 、 AS等
+
+# 管道（Pipeline）和阶段（Stage）
+
+整个聚合运算过程称为管道（Pipeline），它是由多个阶段（Stage）组成的， 每个管道：
+    接受一系列文档（原始数据）； 
+    每个阶段对这些文档进行一系列运算；
+    结果文档输出给下一个阶段；
+
+$聚合管道操作语法
+pipeline = [$stage1, $stage2, ...$stageN];
+db.collection.aggregate(pipeline, {options})
+
+pipelines 一组数据聚合阶段。除$out、$Merge和$geonear阶段之外，每个阶段都可以在管道中出现多次。
+
+options 可选，聚合操作的其他参数。包含：查询计划、是否使用临时文件、 游标、最大操作时间、读写策略、强制索引等等
+
+$常用的管道聚合阶段
+
+阶段 描述 SQL等价运算符
+$match 筛选条件 WHERE
+$project 投影 AS
+$lookup 左外连接 LEFT OUTER JOIN
+$sort 排序 ORDER BY
+$group 分组 GROUP BY
+$skip/$limit 分页
+$unwind 展开数组
+$graphLookup 图搜索
+$facet/$bucket 分面搜索
+
+文档：Aggregation Pipeline Stages — MongoDB Manual
+
+$数据准备
+准备数据集，执行脚本
+
+var tags = ["nosql","mongodb","document","developer","popular"];
+var types = ["technology","sociality","travel","novel","literature"];
+var books=[];
+
+for(var i=0;i<50;i++){
+var typeIdx = Math.floor(Math.random()*types.length);
+var tagIdx = Math.floor(Math.random()*tags.length);
+var tagIdx2 = Math.floor(Math.random()*tags.length);
+var favCount = Math.floor(Math.random()*100);
+var username = "xx00"+Math.floor(Math.random()*10);
+var age = 20 + Math.floor(Math.random()*15);
+var book = {
+title: "book-"+i,
+type: types[typeIdx],
+tag: [tags[tagIdx],tags[tagIdx2]],
+favCount: favCount,
+author: {name:username,age:age}
+};
+books.push(book)
+}
+db.books.insertMany(books);

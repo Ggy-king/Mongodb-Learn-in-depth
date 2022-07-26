@@ -1,0 +1,159 @@
+# 案例
+
+db.books.insert([
+{
+"title" : "book-51",
+"type" : "technology",
+"favCount" : 11,
+"tag":[],
+"author" : {
+"name" : "fox",
+"age" : 28
+}
+},{
+"title" : "book-52",
+"type" : "technology",
+"favCount" : 15,
+"author" : {
+"name" : "fox",
+"age" : 28
+}
+},{
+"title" : "book-53",
+"type" : "technology",
+"tag" : [
+"nosql",
+"document"
+],
+"favCount" : 20,
+"author" : {
+"name" : "fox",
+"age" : 28
+}
+}])
+
+
+测试
+
+# 使用includeArrayIndex选项来输出数组元素的数组索引
+db.books.aggregate([
+{$match:{"author.name":"fox"}},
+{$unwind:{path:"$tag", includeArrayIndex: "arrayIndex"}}
+])
+# 使用preserveNullAndEmptyArrays选项在输出中包含缺少size字段，null或空数组的文档
+db.books.aggregate([
+{$match:{"author.name":"fox"}},
+{$unwind:{path:"$tag", preserveNullAndEmptyArrays: true}}
+])
+
+$limit
+
+限制传递到管道中下一阶段的文档数
+db.books.aggregate([
+{$limit : 5 }
+])
+
+此操作仅返回管道传递给它的前5个文档。 $limit对其传递的文档内容没有影响。
+注意：当$sort在管道中的$limit之前立即出现时，$sort操作只会在过程中维持前n个结果，其中n是指
+定的限制，而MongoDB只需要将n个项存储在内存中。
+
+$skip
+
+跳过进入stage的指定数量的文档，并将其余文档传递到管道中的下一个阶段
+db.books.aggregate([
+{$skip : 5 }
+])
+
+此操作将跳过管道传递给它的前5个文档。 $skip对沿着管道传递的文档的内容没有影响。
+
+$sort
+
+对所有输入文档进行排序，并按排序顺序将它们返回到管道。
+{ $sort: { <field1>: <sort order>, <field2>: <sort order> ... } }
+
+要对字段进行排序，请将排序顺序设置为1或-1，以分别指定升序或降序排序，如下例所示：
+db.books.aggregate([
+{$sort : {favCount:-1,title:1}}
+])
+
+$lookup
+
+ Mongodb 3.2版本新增，主要用来实现多表关联查询， 相当关系型数据库中多表关联查询。每个输入
+待处理的文档，经过$lookup 阶段的处理，输出的新文档中会包含一个新生成的数组（可根据需要命名
+新key ）。数组列存放的数据是来自被Join集合的适配文档，如果没有，集合为空（即 为[ ])
+
+db.collection.aggregate([{
+$lookup: {
+from: "<collection to join>",
+localField: "<field from the input documents>",
+foreignField: "<field from the documents of the from collection>",
+as: "<output array field>"
+}
+})
+
+属性 作用
+from         同一个数据库下等待被Join的集合。
+
+
+localField      源集合中的match值，如果输入的集合中，某文档没有 localField这个Key（Field），在处理的过程中，会默认为此文档含有 localField：null的键值对。
+
+
+foreignField        待Join的集合的match值，如果待Join的集合中，文档没有foreignField值，在处理的过程中，会默认为此文档含有 foreignField：null的键值对。
+
+
+as 为输出文档的新增值命名。如果输入的集合中已存在该值，则会覆盖掉
+
+# 注意：null = null 此为真
+其语法功能类似于下面的伪SQL语句：
+
+SELECT *, <output array field>
+FROM collection
+WHERE <output array field> IN (SELECT *
+FROM <collection to join>
+WHERE <foreignField>= <collection.localField>);
+
+# 案例
+
+db.customer.insert({customerCode:1,name:"customer1",phone:"13112345678",address:
+"test1"})
+db.customer.insert({customerCode:2,name:"customer2",phone:"13112345679",address:
+"test2"})
+db.order.insert({orderId:1,orderCode:"order001",customerCode:1,price:200})
+db.order.insert({orderId:2,orderCode:"order002",customerCode:2,price:400})
+db.orderItem.insert({itemId:1,productName:"apples",qutity:2,orderId:1})
+db.orderItem.insert({itemId:2,productName:"oranges",qutity:2,orderId:1})
+db.orderItem.insert({itemId:3,productName:"mangoes",qutity:2,orderId:1})
+db.orderItem.insert({itemId:4,productName:"apples",qutity:2,orderId:2})
+db.orderItem.insert({itemId:5,productName:"oranges",qutity:2,orderId:2})
+db.orderItem.insert({itemId:6,productName:"mangoes",qutity:2,orderId:2})
+
+关联查询
+
+db.customer.aggregate([
+{$lookup: {
+from: "order",
+localField: "customerCode",
+foreignField: "customerCode",
+as: "customerOrder"
+}
+}])
+
+
+db.order.aggregate([
+{$lookup: {
+from: "customer",
+localField: "customerCode",
+foreignField: "customerCode",
+as: "curstomer"
+}},
+
+
+{$lookup: {
+from: "orderItem",
+localField: "orderId",
+foreignField: "orderId",
+as: "orderItem"
+}
+}
+])
+

@@ -1,0 +1,43 @@
+# 在dos窗口直接输入命令就可以登录数据库 这在工作中是不被允许的
+
+# 解决办法 开启权限机制 开启验证模式即可
+
+# 创建账号
+db.createUser({
+    "user":"账号",
+    "pwd":"密码",
+    "roles":[{
+        role:"角色",
+        db:"所属数据库"
+    }]
+})
+
+# 步骤
+1 添加超级管理员
+mongo
+use admin
+db.createUser({
+    "user":"admin",
+    "pwd":"666admin",
+    "roles":[{
+        role:"root",
+        db:"admin"
+    }]
+})
+
+2 退出卸载服务
+mongod --remove
+
+DOS窗口必须用管理员身份运行
+
+3 重新安装需要输入密码的服务(注在原安装命令基础上加上 --auth)
+bin\mongod --install --dbpath E:\mongodb\data --logpath E:\mongodb\logs\mongodb2.log --auth
+
+4 启动服务 -> 登录测试
+启动服务： net start mongodb
+
+登录测试： 1   mongo 服务器IP地址:端口/数据库 -u 用户名 -p 密码
+          2   a-先登录 b-选择数据库 c-输入db.auth(用户名,密码)
+
+
+

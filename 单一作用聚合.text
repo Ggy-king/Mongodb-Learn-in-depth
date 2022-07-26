@@ -1,0 +1,25 @@
+# 单一作用聚合
+
+MongoDB提供 db.collection.estimatedDocumentCount(), db.collection.count(),
+db.collection.distinct() 这类单一作用的聚合函数。 所有这些操作都聚合来自单个集合的文档。虽然这
+些操作提供了对公共聚合过程的简单访问，但它们缺乏聚合管道和map-Reduce的灵活性和功能。
+
+函数 描述
+db.collection.estimatedDocumentCount() 忽略查询条件，返回集合或视图中所有文档的计数
+
+db.collection.count() 返回与find()集合或视图的查询匹配的文档计数 。等同于 db.collection.find(query).count()构造
+
+db.collection.distinct() 在单个集合或视图中查找指定字段的不同值，并在数组中返回结果。
+
+#检索books集合中所有文档的计数
+db.books.estimatedDocumentCount()
+#计算与查询匹配的所有文档
+db.books.count({favCount:{$gt:50}})
+#返回不同type的数组
+db.books.distinct("type")
+#返回收藏数大于90的文档不同type的数组
+db.books.distinct("type",{favCount:{$gt:90}})
+
+
+$注意：在分片群集上，如果存在孤立文档或正在进行块迁移，则db.collection.count()没有查询谓词可能
+$导致计数不准确。要避免这些情况，请在分片群集上使用 db.collection.aggregate()方法。
