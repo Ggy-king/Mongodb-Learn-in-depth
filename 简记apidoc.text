@@ -1,0 +1,46 @@
+# 写接口  apiDoc
+
+1 下载模块 后期通过命令基于注释生成文档(仅一次)
+如 npm install apidoc -g
+
+2 在项目根目录下创建apidoc.json文件(仅一次)
+
+{
+  "name": "example",
+  "version": "0.1.0",
+  "description": "apiDoc basic example",
+  "title": "Custom apiDoc browser title",
+  "url" : "https://api.github.com/v1"
+}
+
+3 去接口写注释(n次)
+# 这个写在控制器中
+/**
+ * @api {get} /user/:id Request User information
+ * @apiName GetUser
+ * @apiGroup User
+ *
+ * @apiParam {Number} id Users unique ID.
+ *
+ * @apiSuccess {String} firstname Firstname of the User.
+ * @apiSuccess {String} lastname  Lastname of the User.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "firstname": "John",
+ *       "lastname": "Doe"
+ *     }
+ *
+ * @apiError UserNotFound The id of the User was not found.
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 404 Not Found
+ *     {
+ *       "error": "UserNotFound"
+ *     }
+ */
+
+4 生成接口文档(n次)
+
+apidoc -i ./接口注释目录 -o ./接口文档存放目录

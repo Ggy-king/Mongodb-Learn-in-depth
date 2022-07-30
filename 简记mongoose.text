@@ -1,0 +1,53 @@
+# 玩转API
+
+# mongoose
+
+为什么要学数据库 因为要存项目/网站数据
+实战中是通过程序实现
+
+1 mongoose是node提供操作mongodb的模块
+2 mongoose能够通过node语法实现mongodb数据库的增删改查
+
+# mongoose
+下载 npm i mongoose
+
+# Schema
+用来约束Mongodb文档数据(那些字段必须加 那些字段可选)
+
+# Model
+一个模型对应一个集合
+后面我们学习模型来管理集合中的数据
+
+
+# 操作
+一 导入模块
+const mongoose = require('mongoose')
+
+二 连接数据库
+const db = mongoose.createConnection('mongodb://user:pass@localhost:port/database',{
+    useNewUrlParser:true,
+    useUnifiedTopology: true
+},err => {
+    if(err){
+        console.log('数据库连接失败',err)
+        return;
+    }
+    console.log('数据库连接成功')
+})
+
+
+三 设计数据模型
+const model = db.model('user',{
+    uname:{type:String,default:"username"},
+    pwd:{type:String},
+    age:{type:Number}
+})
+
+
+四 创建实例操作
+const insertObj = new model({
+    uname:"张三",
+    pwd:"iloveyou",
+    age:10
+})
+insertObj.save()
