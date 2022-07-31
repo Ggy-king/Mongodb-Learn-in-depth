@@ -1,0 +1,52 @@
+# 创建视图
+
+#基本语法格式
+db.createView(
+"<viewName>",
+"<source>",
+[<pipeline>],
+{
+"collation" : { <collation> }
+}
+)
+
+viewName : 必须，视图名称
+source : 必须，数据源，集合/视图
+[] : 可选，一组管道
+collation 可选，排序规则
+
+# 单个集合创建视图
+假设现在查看当天最高的10笔订单视图，例如需要实时显示金额最高的订单
+
+db.createView(
+"orderInfo", //视图名称
+"order", //数据源
+[
+//筛选符合条件的订单，大于当天，这里要注意时区
+{ $match: { "orderTime": { $gte: ISODate("2022-01-26T00:00:00.000Z") } }
+},
+//按金额倒序
+{ $sort: { "price": -1 } },
+//限制10个文档
+{ $limit: 10 },
+//选择要显示的字段
+//0: 排除字段，若字段上使用（_id除外），就不能有其他包含字段
+//1: 包含字段
+{ $project: { _id: 0, orderNo: 1, price: 1, orderTime: 1 } }
+]
+)
+
+# 视图创建成功后可以直接使用视图查询数据
+# 多个集合创建视图
+
+跟单个是集合是一样，只是多了$lookup连接操作符，视图根据管道最终结果显示，所以可以关联多个集合
+db.orderDetail.drop()
+db.createView(
+"orderDetail",
+"order",
+[
+{ $lookup: { from: "shipping", localField: "orderNo", foreignField:
+"orderNo", as: "shipping" } },
+{ $project: { "orderNo": 1, "price": 1, "shipping.address": 1 } }
+]
+)

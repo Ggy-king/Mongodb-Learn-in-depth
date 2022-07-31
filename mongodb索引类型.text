@@ -1,0 +1,124 @@
+# 单键索引
+在某一个特定的字段上建立索引 mongoDB在ID上建立了唯一的单键索引,所以经常会使用id来进行查
+询； 在索引字段上进行精确匹配、排序以及范围查找都会使用此索引
+
+# 复合索引
+复合索引是多个字段组合而成的索引，其性质和单字段索引类似。但不同的是，复合索引中字段的顺
+序、字段的升降序对查询性能有直接的影响，因此在设计复合索引时则需要考虑不同的查询场景
+
+# 多键索引
+在数组的属性上建立索引。针对这个数组的任意值的查询都会定位到这个文档,既多个索引入口或者键值
+引用同一个文档
+
+
+准备inventory集合：
+db.inventory.insertMany([
+{ _id: 5, type: "food", item: "aaa", ratings: [ 5, 8, 9 ] },
+{ _id: 6, type: "food", item: "bbb", ratings: [ 5, 9 ] },
+{ _id: 7, type: "food", item: "ccc", ratings: [ 9, 5, 8 ] },
+{ _id: 8, type: "food", item: "ddd", ratings: [ 9, 5 ] },
+{ _id: 9, type: "food", item: "eee", ratings: [ 5, 9, 5 ] }
+])
+
+创建多键索引
+db.inventory.createIndex( { ratings: 1 } )
+
+$ 多键索引很容易与复合索引产生混淆，复合索引是多个字段的组合，而多键索引则仅仅是在一个字段上
+$ 出现了多键（multi key）。而实质上，多键索引也可以出现在复合字段上
+
+# 创建复合多键索引
+db.inventory.createIndex( { item:1,ratings: 1} )
+
+注意： MongoDB并不支持一个复合索引中同时出现多个数组字段
+嵌入文档的索引数组
+
+db.inventory.insertMany([
+{
+_id: 1,
+item: "abc",
+stock: [
+{ size: "S", color: "red", quantity: 25 },
+{ size: "S", color: "blue", quantity: 10 },
+{ size: "M", color: "blue", quantity: 50 }
+]
+},
+{
+_id: 2,
+item: "def",
+stock: [
+{ size: "S", color: "blue", quantity: 20 },
+{ size: "M", color: "blue", quantity: 5 },
+{ size: "M", color: "black", quantity: 10 },
+{ size: "L", color: "red", quantity: 2 }
+]
+},
+{
+_id: 3,
+item: "ijk",
+stock: [
+{ size: "M", color: "blue", quantity: 15 },
+{ size: "L", color: "blue", quantity: 100 },
+{ size: "L", color: "red", quantity: 25 }
+]
+}
+])
+
+# 在包含嵌套对象的数组字段上创建多键索引
+db.inventory.createIndex( { "stock.size": 1, "stock.quantity": 1 } )
+
+# 地理空间索引（Geospatial Index）
+
+在移动互联网时代，基于地理位置的检索（LBS）功能几乎是所有应用系统的标配。MongoDB为地理空
+间检索提供了非常方便的功能。地理空间索引（2dsphereindex）就是专门用于实现位置检索的一种特
+殊索引。
+案例：MongoDB如何实现"查询附近商家"
+假设商家的数据模型如下：
+db.restaurant.insert({
+restaurantId: 0,
+restaurantName:"兰州牛肉面",
+location : {
+type: "Point",
+coordinates: [ -73.97, 40.77 ]
+}
+})
+
+
+创建一个2dsphere索引
+db.restaurant.createIndex({location : "2dsphere"})
+
+查询附近10000米商家信息
+db.restaurant.find( {
+location:{
+$near :{
+$geometry :{
+type : "Point" ,
+coordinates : [ -73.88, 40.78 ]
+} ,
+$maxDistance:10000
+}
+}
+} )
+
+$near查询操作符，用于实现附近商家的检索，返回数据结果会按距离排序。
+$geometry操作符用于指定一个GeoJSON格式的地理空间对象，type=Point表示地理坐标点，
+ coordinates则是用户当前所在的经纬度位置；$maxDistance限定了最大距离，单位是米。
+
+# 全文索引（Text Indexes）
+MongoDB支持全文检索功能，可通过建立文本索引来实现简易的分词检索。
+
+db.reviews.createIndex( { comments: "text" } )
+
+$text操作符可以在有text index的集合上执行文本检索。$text将会使用空格和标点符号作为分隔符对检
+索字符串进行分词， 并且对检索字符串中所有的分词结果进行一个逻辑上的 OR 操作。
+全文索引能解决快速文本查找的需求，比如有一个博客文章集合，需要根据博客的内容来快速查找，则
+可以针对博客内容建立文本索引
+
+# Hash索引
+不同于传统的B-Tree索引,哈希索引使用hash函数来创建索引。在索引字段上进行精确匹配,但不支持范
+围查询,不支持多键hash； Hash索引上的入口是均匀分布的,在分片集合中非常有用；
+db.users. createIndex({username : 'hashed'})
+
+
+# 通配符索引
+MongoDB的文档模式是动态变化的，而通配符索引可以建立在一些不可预知的字段上，以此实现查询
+的加速。MongoDB 4.2 引入了通配符索引来支持对未知或任意字段的查询。

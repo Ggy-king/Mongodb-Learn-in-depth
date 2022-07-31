@@ -1,0 +1,57 @@
+# MapReduce
+MapReduce操作将大量的数据处理工作拆分成多个线程并行处理，然后将结果合并在一起。MongoDB
+提供的Map-Reduce非常灵活，对于大规模数据分析也相当实用。
+
+MapReduce具有两个阶段:
+1. 将具有相同Key的文档数据整合在一起的map阶段
+2. 组合map操作的结果进行统计输出的reduce阶段
+
+#  MapReduce的基本语法
+db.collection.mapReduce(
+function() {emit(key,value);}, //map 函数
+function(key,values) {return reduceFunction}, //reduce 函数
+{
+out: <collection>,
+query: <document>,
+sort: <document>,
+limit: <number>,
+finalize: <function>,
+scope: <document>,
+jsMode: <boolean>,
+verbose: <boolean>,
+bypassDocumentValidation: <boolean>
+}
+)
+
+map，将数据拆分成键值对，交给reduce函数
+
+reduce，根据键将值做统计运算
+
+out，可选，将结果汇入指定表
+
+quey，可选筛选数据的条件，筛选的数据送入map
+
+sort，排序完后，送入map
+
+limit，限制送入map的文档数
+
+finalize，可选，修改reduce的结果后进行输出
+
+scope，可选，指定map、reduce、finalize的全局变量
+
+jsMode，可选，默认false。在mapreduce过程中是否将数 据转换成bson格式
+
+verbose，可选，是否在结果中显示时间，默认false
+
+bypassDocmentValidation，可选，是否略过数据校验
+
+
+# 统计type为travel的不同作者的book文档收藏数
+db.books.mapReduce(
+function(){emit(this.author.name,this.favCount)},
+function(key,values){return Array.sum(values)},
+{
+query:{type:"travel"},
+out: "books_favCount"
+}
+)

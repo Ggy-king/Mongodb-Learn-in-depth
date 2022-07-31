@@ -1,0 +1,28 @@
+# 视图
+MongoDB视图是一个可查询的对象，它的内容由其他集合或视图上的聚合管道定义。 MongoDB不会将
+视图内容持久化到磁盘。 当客户端查询视图时，视图的内容按需计算。 MongoDB可以要求客户端具有
+查询视图的权限。 MongoDB不支持对视图进行写操作。
+
+# 作用：
+数据抽象
+保护敏感数据的一种方法
+将敏感数据投影到视图之外
+只读
+结合基于角色的授权，可按角色访问信息
+
+# 数据准备
+var orders = new Array();
+var shipping = new Array();
+var addresses = ["广西省玉林市", "湖南省岳阳市", "湖北省荆州市", "甘肃省兰州市", "吉林省松
+原市", "江西省景德镇", "辽宁省沈阳市", "福建省厦门市", "广东省广州市", "北京市朝阳区"];
+for (var i = 10000; i < 20000; i++) {
+var orderNo = i + Math.random().toString().substr(2, 5);
+orders[i] = { orderNo: orderNo, userId: i, price: Math.round(Math.random() *
+10000) / 100, qty: Math.floor(Math.random() * 10) + 1, orderTime: new Date(new
+Date().setSeconds(Math.floor(Math.random() * 10000))) };
+var address = addresses[Math.floor(Math.random() * 10)];
+shipping[i] = { orderNo: orderNo, address: address, recipienter: "Wilson",
+province: address.substr(0, 3), city: address.substr(3, 3) }
+}
+db.order.insert(orders);
+db.shipping.insert(shipping);

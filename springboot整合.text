@@ -1,0 +1,62 @@
+MongoTemplate提供了aggregate方法来实现对数据的聚合操作
+
+# 示例：以聚合管道示例2为例
+实体结构
+@Document("zips")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Zips {
+@Id //映射文档中的_id
+private String id;
+@Field
+private String city;
+@Field
+private Double[] loc;
+@Field
+private Integer pop;
+@Field
+private String state;
+}
+
+返回人口超过1000万的州
+db.zips.aggregate( [
+{ $group: { _id: "$state", totalPop: { $sum: "$pop" } } },
+{ $match: { totalPop: { $gt: 10*1000*1000 } } }
+] )
+
+返回各州平均城市人口
+db.zips.aggregate( [
+{ $group: { _id: { state: "$state", city: "$city" }, cityPop: { $sum: "$pop" }
+} },
+{ $group: { _id: "$_id.state", avgCityPop: { $avg: "$cityPop" } } },
+{ $sort:{avgCityPop:-1}}
+] )
+
+按州返回最大和最小的城市
+db.zips.aggregate( [
+{ $group:
+{
+_id: { state: "$state", city: "$city" },
+pop: { $sum: "$pop" }
+}
+},
+{ $sort: { pop: 1 } },
+{ $group:
+{
+_id : "$_id.state",
+biggestCity: { $last: "$_id.city" },
+biggestPop: { $last: "$pop" },
+smallestCity: { $first: "$_id.city" },
+smallestPop: { $first: "$pop" }
+}
+},
+{ $project:
+{ _id: 0,
+state: "$_id",
+biggestCity: { name: "$biggestCity", pop: "$biggestPop" },
+smallestCity: { name: "$smallestCity", pop: "$smallestPop" }
+}
+},
+{ $sort: { state: 1 } }
+] )
