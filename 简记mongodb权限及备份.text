@@ -17,11 +17,11 @@ db.createUser({
 mongo
 use admin
 db.createUser({
-    "user":"tex",
-    "pwd":"666tex",
+    "user":"comment",
+    "pwd":"666comment",
     "roles":[{
         role:"dbOwner",
-        db:"tex"
+        db:"comment"
     }]
 })
 
