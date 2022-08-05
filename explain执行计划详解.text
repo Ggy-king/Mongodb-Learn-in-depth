@@ -1,0 +1,99 @@
+通常我们需要关心的问题：
+
+查询是否使用了索引
+索引是否减少了扫描的记录数量
+是否存在低效的内存排序
+
+MongoDB提供了explain命令，它可以帮助我们评估指定查询模型（querymodel）的执行计划，根据实际情况进行调整，然后提高查询效率。
+
+# explain()方法的形式如下:
+db.collection.find().explain(<verbose>)
+
+verbose 可选参数，表示执行计划的输出模式，默认queryPlanner
+
+# 模式名字 描述
+
+queryPlanner 执行计划的详细信息，包括查询计划、集合信息、查询条件、最佳执行计划、查询方式和 MongoDB 服务信息等
+
+exectionStats 最佳执行计划的执行情况和被拒绝的计划等信息
+
+allPlansExecution 选择并执行最佳执行计划，并返回最佳执行计划和其他执行计划的执行情况
+
+# queryPlanner
+
+# 未创建title的索引
+db.books.find({title:"book-1"}).explain("queryPlanner")
+
+# 字段名称 描述
+
+plannerVersion 执行计划的版本
+
+namespace 查询的集合
+
+indexFilterSet 是否使用索引
+
+parsedQuery 查询条件
+
+winningPlan 最佳执行计划
+
+stage 查询方式
+
+filter 过滤条件
+
+direction 查询顺序
+
+rejectedPlans 拒绝的执行计划
+
+serverInfo mongodb服务器信息
+
+# executionStats
+#创建索引
+db.books.createIndex({title:1})
+db.books.find({title:"book-1"}).explain("executionStats")
+
+
+# 字段名称 描述
+winningPlan.inputStage用来描述子stage，并且为其父stage提供文档和索引关键字
+winningPlan.inputStage.stage 子查询方式
+winningPlan.inputStage.keyPattern 所扫描的index内容
+winningPlan.inputStage.indexName 索引名
+winningPlan.inputStage.isMultiKey是否是Multikey。如果索引建立在array上，将是true
+executionStats.executionSuccess 是否执行成功
+executionStats.nReturned 返回的个数
+executionStats.executionTimeMillis 这条语句执行时间
+executionStats.executionStages.executionTimeMillisEstimate检索文档获取数据的时间
+executionStats.executionStages.inputStage.executionTimeMillisEstimate 扫描获取数据的时间
+executionStats.totalKeysExamined 索引扫描次数
+executionStats.totalDocsExamined 文档扫描次数
+executionStats.executionStages.isEOF是否到达 steam 结尾，1 或者 true 代表已到达结尾
+executionStats.executionStages.works工作单元数，一个查询会分解成小的工作单元
+executionStats.executionStages.advanced 优先返回的结果数
+executionStats.executionStages.docsExamined 文档检查数
+
+
+# allPlansExecution
+allPlansExecution返回的信息包含 executionStats 模式的内容，且包含allPlansExecution:[]块
+
+"allPlansExecution" : [
+{
+"nReturned" : <int>,
+"executionTimeMillisEstimate" : <int>,
+"totalKeysExamined" : <int>,
+"totalDocsExamined" :<int>,
+"executionStages" : {
+"stage" : <STAGEA>,
+"nReturned" : <int>,
+"executionTimeMillisEstimate" : <int>,
+...
+}
+}
+
+]
+
+# 执行计划的返回结果中尽量不要出现以下stage:
+
+COLLSCAN(全表扫描)
+SORT(使用sort但是无index)
+不合理的SKIP
+SUBPLA(未用到index的$or)
+COUNTSCAN(不使用index进行count)
